@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Yurtdışı Hisse Kazancı ve Vergi Hesaplama</title>
+<style>
+  body { font-family: Arial, sans-serif; padding: 20px; max-width: 500px; margin: auto; background: #fafafa; }
+  h2 { text-align: center; color: #333; }
+  label { display: block; margin-top: 15px; font-weight: bold; color: #555; }
+  input { width: 100%; padding: 8px; margin-top: 5px; border: 1px solid #ccc; border-radius: 4px; font-size: 16px; }
+  button { margin-top: 25px; padding: 12px 18px; font-size: 18px; background-color: #007BFF; color: white; border: none; border-radius: 5px; cursor: pointer; }
+  button:hover { background-color: #0056b3; }
+  .result { margin-top: 25px; background: #e9ecef; padding: 15px 20px; border-radius: 8px; font-size: 17px; color: #222; }
+  p { margin: 10px 0; }
+  .error { color: red; font-weight: bold; }
+</style>
+</head>
+<body>
+
+<h2>Yurtdışı Hisse Kazancı ve Vergi Hesaplama</h2>
+
+<label for="alisBedel">Alış Bedeli (TL):</label>
+<input type="number" id="alisBedel" placeholder="Örn: 10000" min="0" step="0.01" />
+
+<label for="satisBedel">Satış Bedeli (TL):</label>
+<input type="number" id="satisBedel" placeholder="Örn: 30000" min="0" step="0.01" />
+
+<label for="yiufeArtis">Yİ-ÜFE Artış Oranı (%):</label>
+<input type="number" id="yiufeArtis" placeholder="Örn: 82.30" min="0" step="0.01" />
+
+<button onclick="hesapla()">Hesapla</button>
+
+<div class="result" id="result"></div>
+
+<script>
+function hesapla() {
+  const alisBedel = parseFloat(document.getElementById('alisBedel').value);
+  const satisBedel = parseFloat(document.getElementById('satisBedel').value);
+  const yiufeArtisYuzde = parseFloat(document.getElementById('yiufeArtis').value);
+
+  const resultDiv = document.getElementById('result');
+  resultDiv.innerHTML = '';
+
+  if (isNaN(alisBedel) || alisBedel <= 0) {
+    resultDiv.innerHTML = '<p class="error">Lütfen geçerli bir Alış Bedeli giriniz.</p>';
+    return;
+  }
+  if (isNaN(satisBedel) || satisBedel <= 0) {
+    resultDiv.innerHTML = '<p class="error">Lütfen geçerli bir Satış Bedeli giriniz.</p>';
+    return;
+  }
+  if (isNaN(yiufeArtisYuzde) || yiufeArtisYuzde < 0) {
+    resultDiv.innerHTML = '<p class="error">Lütfen geçerli bir Yİ-ÜFE Artış Oranı giriniz (>=0).</p>';
+    return;
+  }
+
+  let endekslenmisMaliyet;
+  if (yiufeArtisYuzde < 10) {
+    endekslenmisMaliyet = alisBedel;
+  } else {
+    endekslenmisMaliyet = alisBedel * (1 + yiufeArtisYuzde / 100);
+  }
+
+  const vergiyeTabiKazanc = satisBedel - endekslenmisMaliyet;
+
+  if (vergiyeTabiKazanc <= 0) {
+    resultDiv.innerHTML = '<p>Değer artış kazancı yok veya zarar var. Vergi hesaplanmaz.</p>';
+    return;
+  }
+
+  const vergiOrani = 0.15;
+  const odenecekVergi = vergiyeTabiKazanc * vergiOrani;
+
+  resultDiv.innerHTML = `
+    <h3>Sonuçlar:</h3>
+    <p>Endekslenmiş Maliyet Bedeli: <strong>${endekslenmisMaliyet.toFixed(2)} TL</strong></p>
+    <p>Vergiye Tabi Değer Artış Kazancı: <strong>${vergiyeTabiKazanc.toFixed(2)} TL</strong></p>
+    <p>Ödenecek Gelir Vergisi (%15): <strong>${odenecekVergi.toFixed(2)} TL</strong></p>
+    <p><em>Not: Vergi 110.000 TL altı kazançlar için %15 oranındadır.</em></p>
+  `;
+}
+</script>
+
+</body>
+</html>
