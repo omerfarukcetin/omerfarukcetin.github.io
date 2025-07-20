@@ -2,81 +2,211 @@
 <html lang="tr">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Bir Damla Huzur</title>
   <style>
     body {
-      font-family: Arial, sans-serif;
-      background-color: #f4f1ee;
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #f4f9f4;
+      color: #333;
       margin: 0;
       padding: 0;
+    }
+
+    header {
+      background-color: #d6eae3;
       text-align: center;
+      padding: 20px;
     }
-    .container {
-      max-width: 600px;
-      margin: 50px auto;
-      background-color: #fff;
-      padding: 30px;
-      border-radius: 15px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+
+    header h1 {
+      margin: 0;
+      font-size: 2em;
+      color: #2e5e4e;
     }
-    .soz {
-      font-size: 20px;
+
+    header p {
+      margin: 5px 0 0;
+      font-style: italic;
+      color: #4d4d4d;
+    }
+
+    main {
+      max-width: 700px;
+      margin: 30px auto;
+      padding: 0 20px;
+    }
+
+    .daily-content {
+      background-color: #ffffff;
+      border-left: 5px solid #78b69e;
+      padding: 20px;
       margin-bottom: 30px;
-      color: #333;
+      box-shadow: 0 0 10px rgba(0,0,0,0.05);
     }
-    .buttons {
-      display: flex;
-      justify-content: center;
-      gap: 15px;
-      flex-wrap: wrap;
+
+    .daily-content h2 {
+      color: #2f5c4c;
     }
-    .button {
-      padding: 10px 20px;
+
+    .daily-content blockquote {
+      font-style: italic;
+      font-size: 1.2em;
+      margin: 20px 0;
+      color: #444;
+      border-left: 4px solid #a5d6a7;
+      padding-left: 15px;
+    }
+
+    .daily-content .note {
+      font-size: 0.95em;
+      color: #666;
+    }
+
+    .share-buttons {
+      margin-top: 20px;
+    }
+
+    .share-buttons button {
+      margin-right: 10px;
+      padding: 8px 14px;
+      background-color: #2e5e4e;
+      color: #fff;
       border: none;
-      border-radius: 10px;
-      background-color: #875656;
-      color: white;
+      border-radius: 4px;
       cursor: pointer;
-      transition: 0.3s;
+      font-size: 0.9em;
     }
-    .button:hover {
-      background-color: #a86a6a;
+
+    .share-buttons button:hover {
+      background-color: #244b3d;
+    }
+
+    .past-entries h3,
+    .zikir h3,
+    .subscribe h3 {
+      color: #2f5c4c;
+    }
+
+    .past-entries ul {
+      list-style: none;
+      padding-left: 0;
+    }
+
+    .past-entries li {
+      padding: 5px 0;
+      border-bottom: 1px solid #eee;
+    }
+
+    .subscribe input[type="email"] {
+      padding: 10px;
+      width: 70%;
+      margin-right: 10px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+
+    .subscribe button {
+      padding: 10px 20px;
+      background-color: #2e5e4e;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    footer {
+      background-color: #d6eae3;
+      text-align: center;
+      padding: 15px;
+      font-size: 0.9em;
+      color: #555;
+      margin-top: 40px;
+    }
+
+    @media (max-width: 600px) {
+      .subscribe input[type="email"] {
+        width: 100%;
+        margin-bottom: 10px;
+      }
+      .subscribe button {
+        width: 100%;
+      }
     }
   </style>
 </head>
 <body>
+  <header>
+    <h1>🌿 Bir Damla Huzur</h1>
+    <p>Her güne bir damla… Kalbine iyi gelecek sözlerle…</p>
+  </header>
 
-<div class="container">
-  <h1>Bir Damla Huzur</h1>
-  <div class="soz" id="dailyQuote">
-    "Güzel söz sadakadır." – Hadis-i Şerif
-  </div>
+  <main>
+    <section class="daily-content">
+      <h2>📅 20 Temmuz 2025 - Bugünün Huzur Damlası</h2>
+      <blockquote id="quoteText">
+        “Tebessüm etmek sadakadır.”  
+        <br><small>– Hadis-i Şerif, Tirmizi</small>
+      </blockquote>
+      <p class="note">
+        Tebessüm, kalpten kalbe akan küçük bir sevaptır. İnsanın gönlünü yumuşatır, sadaka sevabı kazandırır.
+      </p>
 
-  <div class="buttons">
-    <button class="button" onclick="shareInstagram()">Instagram’da Paylaş</button>
-    <button class="button" onclick="shareWhatsApp()">WhatsApp’ta Gönder</button>
-    <button class="button" onclick="copyToClipboard()">Kopyala</button>
-  </div>
-</div>
+      <div class="share-buttons">
+        <button onclick="shareWhatsApp()">WhatsApp’ta gönder</button>
+        <button onclick="copyToClipboard()">Kopyala</button>
+      </div>
+    </section>
 
-<script>
-  const quote = document.getElementById("dailyQuote").innerText;
+    <section class="past-entries">
+      <h3>📚 Önceki Damlalar</h3>
+      <ul>
+        <li>19 Temmuz - “Az konuşmak hikmettir...” – İmam Gazali</li>
+        <li>18 Temmuz - “Her işin başı sabırdır.” – Hz. Ali (r.a.)</li>
+        <li>17 Temmuz - “Kalp temizse dil de temiz olur.” – Yunus Emre</li>
+        <li>16 Temmuz - “Merhamet etmeyene merhamet edilmez.” – Hadis</li>
+        <li>15 Temmuz - “Tevazu, ilmin meyvesidir.” – İmam Şafii</li>
+      </ul>
+    </section>
 
-  function shareInstagram() {
-    alert("Instagram doğrudan paylaşım desteklemez. Lütfen metni kopyalayıp manuel paylaşın.");
-  }
+    <section class="zikir">
+      <h3>🧎‍♂️ Haftanın Zikri</h3>
+      <p>
+        “Hasbiyallahu la ilahe illa Hu, aleyhi tevekkeltü, ve Huve Rabbül Arşil Azim.”
+        <br>➡️ 9 defa okunması tavsiye edilir.
+      </p>
+    </section>
 
-  function shareWhatsApp() {
-    const url = "https://wa.me/?text=" + encodeURIComponent(quote + "\nhttps://birdamlahuzur.com");
-    window.open(url, "_blank");
-  }
+    <section class="subscribe">
+      <h3>💌 Günlük huzur mesajını almak ister misin?</h3>
+      <form>
+        <input type="email" placeholder="E-posta adresiniz" required>
+        <button type="submit">Abone Ol</button>
+      </form>
+    </section>
+  </main>
 
-  function copyToClipboard() {
-    navigator.clipboard.writeText(quote).then(() => {
-      alert("Söz panoya kopyalandı!");
-    });
-  }
-</script>
+  <footer>
+    © 2025 Bir Damla Huzur | Sadece hatırlatma niyetiyle, gönülden gönüle...
+  </footer>
 
+  <script>
+    function shareInstagram() {
+      alert("Instagram'da metin paylaşımı doğrudan mümkün değil. Lütfen ekran görüntüsü alarak paylaşınız.");
+    }
+
+    function shareWhatsApp() {
+      const text = document.getElementById("quoteText").innerText;
+      const url = "https://wa.me/?text=" + encodeURIComponent(text + "\nhttps://birdamlahuzur.com");
+      window.open(url, "_blank");
+    }
+
+    function copyToClipboard() {
+      const text = document.getElementById("quoteText").innerText;
+      navigator.clipboard.writeText(text).then(() => {
+        alert("Söz panoya kopyalandı!");
+      });
+    }
+  </script>
 </body>
 </html>
