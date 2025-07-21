@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Sigara Tasarruf Hesaplayıcı</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #f8f9fa;
+      padding: 2rem;
+    }
+    .card {
+      box-shadow: 0 0.5rem 1rem rgba(0,0,0,0.1);
+    }
+    .remove-btn {
+      cursor: pointer;
+    }
+    .form-control-sm {
+      font-size: 0.9rem;
+    }
+    .period-inputs .row {
+      margin-bottom: 0.5rem;
+    }
+    .result-box {
+      font-weight: bold;
+      font-size: 1.2rem;
+      margin-top: 1rem;
+    }
+    .period-savings-detail {
+      font-size: 0.9rem;
+      color: #555;
+      margin-top: 0.5rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="card p-4">
+      <h2 class="mb-4 text-center">🚭 Sigara Tasarruf Hesaplayıcı</h2>
+      <form id="savingsForm">
+        <div class="mb-3 row">
+          <div class="col-md-6">
+            <label for="dailyCigarettes" class="form-label">Günlük Sigara Adedi</label>
+            <input type="number" class="form-control" id="dailyCigarettes" value="20" required>
+          </div>
+          <div class="col-md-6">
+            <label for="startDate" class="form-label">Bırakma Tarihi</label>
+            <input type="date" class="form-control" id="startDate" required>
+          </div>
+        </div>
+
+        <h5 class="mt-4">📅 Fiyat Dönemleri</h5>
+        <div id="pricePeriods" class="period-inputs"></div>
+
+        <button type="button" class="btn btn-outline-primary btn-sm mt-2" onclick="addPeriod()">+ Dönem Ekle</button>
+
+        <div class="result-box text-success" id="result"></div>
+        <div id="detailedSavings" class="mt-3"></div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    const pricePeriods = document.getElementById("pricePeriods");
+    const startDateInput = document.getElementById("startDate");
+    const resultDiv = document.getElementById("result");
+    const detailedSavingsDiv = document.getElementById("detailedSavings");
+
+    function addPeriod(date = '', price = '') {
+      const row = document.createElement("div");
+      row.classList.add("row", "align-items-end");
+      row.innerHTML = `
+        <div class="col-md-5">
+          <label class="form-label">Başlangıç Tarihi</label>
+          <input type="date" class="form-control form-control-sm period-date" value="${date}">
+        </div>
+        <div class="col-md-5">
+          <label class="form-label">Paket Fiyatı (₺)</label>
+          <input type="number" class="form-control form-control-sm period-price" step="0.01" value="${price}">
+        </div>
+        <div class="col-md-2 text-end">
+          <button type="button" class="btn btn-sm btn-outline-danger remove-btn" onclick="removePeriod(this)">Kaldır</button>
+        </div>
+      `;
+      pricePeriods.appendChild(row);
+      calculateSavings();
+    }
+
+    function removePeriod(button) {
+      button.closest(".row").remove();
+      calculateSavings();
+    }
+
+    function calculateSavings() {
+      const dailyCigarettes = parseFloat(document.getElementById("dailyCigarettes").value);
+      const quitDate = new Date(startDateInput.value);
+      quitDate.setHours(0, 0, 0, 0); // Saati sıfırla
+
+      if (!startDateInput.value || isNaN(dailyCigarettes) || dailyCigarettes <= 0) {
+        resultDiv.innerHTML = '';
+        detailedSavingsDiv.innerHTML = '';
+        return;
+      }
+
+      const now = new Date();
+      now.setHours(0, 0, 0, 0); // Saati sıfırla
+
+      if (now < quitDate) { // Bırakma tarihi bugünden ileri olamaz
+        resultDiv.innerHTML = 'Bırakma tarihi bugünden ileri bir tarih olamaz.';
+        detailedSavingsDiv.innerHTML = '';
+        return;
+      }
+
+      const periods = Array.from(pricePeriods.children).map(row => {
+        const date = new Date(row.querySelector(".period-date").value);
+        date.setHours(0, 0, 0, 0); // Saati sıfırla
+        const price = parseFloat(row.querySelector(".period-price").value);
+        return { date, price };
+      }).filter(p => !isNaN(p.date.getTime()) && !isNaN(p.price) && p.price > 0); // Geçersiz veya sıfır fiyatlı dönemleri filtrele
+
+      if (periods.length === 0) {
+        resultDiv.innerHTML = 'En az bir geçerli fiyat dönemi ekleyiniz.';
+        detailedSavingsDiv.innerHTML = '';
+        return;
+      }
+
+      // Fiyat dönemlerini tarihe göre sırala
+      periods.sort((a, b) => a.date.getTime() - b.date.getTime());
+
+      let totalSavings = 0;
+      let savingsDetailsHtml = '<h5>Dönemlere Göre Tasarruf Detayları:</h5>';
+      let periodSavings = {}; // Her dönem için tasarrufu tutacak obje
+
+      // Bırakma tarihinden itibaren başla
+      let currentDate = new Date(quitDate);
+
+      while (currentDate <= now) {
+        let applicablePrice = 0;
+        let currentPeriodStartDate = null;
+        let nextPeriodStartDate = null;
+
+        // Geçerli fiyat dönemini bul
+        for (let i = 0; i < periods.length; i++) {
+          if (currentDate >= periods[i].date) {
+            applicablePrice = periods[i].price;
+            currentPeriodStartDate = periods[i].date;
+            if (i + 1 < periods.length) {
+                nextPeriodStartDate = periods[i+1].date;
+            } else {
+                nextPeriodStartDate = new Date(now.getFullYear() + 1, 0, 1); // Çok uzak bir gelecek tarihi
+            }
+          } else {
+            break; // Tarih, mevcut dönemden küçükse döngüyü kır
+          }
+        }
+
+        if (applicablePrice > 0) {
+            const dailyCost = (dailyCigarettes / 20) * applicablePrice;
+            totalSavings += dailyCost;
+
+            // Dönem bazında tasarrufu topla
+            const periodKey = currentPeriodStartDate.toISOString().split('T')[0] + " - " + applicablePrice.toFixed(2) + "₺";
+            if (!periodSavings[periodKey]) {
+                periodSavings[periodKey] = 0;
+            }
+            periodSavings[periodKey] += dailyCost;
+        }
+
+        currentDate.setDate(currentDate.getDate() + 1); // Sonraki güne geç
+      }
+
+      // Detayları HTML'e ekle
+      for (const key in periodSavings) {
+          const [periodDateStr, priceStr] = key.split(' - ');
+          const periodDate = new Date(periodDateStr);
+          const formattedPeriodDate = periodDate.toLocaleDateString('tr-TR', { year: 'numeric', month: 'long', day: 'numeric' });
+          savingsDetailsHtml += `<p class="period-savings-detail"><strong>${formattedPeriodDate}</strong> (${priceStr} paket fiyatı): ${periodSavings[key].toFixed(2)} ₺</p>`;
+      }
+
+
+      resultDiv.innerHTML = `💰 Tahmini Toplam Tasarruf: <span class="text-dark">${totalSavings.toFixed(2)} ₺</span>`;
+      detailedSavingsDiv.innerHTML = savingsDetailsHtml;
+    }
+
+    document.getElementById("savingsForm").addEventListener("input", calculateSavings);
+    document.addEventListener("DOMContentLoaded", () => {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0); // Saati sıfırla
+      startDateInput.value = today.toISOString().split('T')[0];
+      
+      // Örnek başlangıç dönemi ve güncel fiyatı
+      addPeriod(today.toISOString().split('T')[0], 60); 
+
+      // Geçmişten bir örnek fiyat dönemi ekleyelim (örneğin 1 yıl öncesi)
+      const oneYearAgo = new Date(today);
+      oneYearAgo.setFullYear(today.getFullYear() - 1);
+      addPeriod(oneYearAgo.toISOString().split('T')[0], 40); // 1 yıl önceki fiyat
+
+      calculateSavings(); // Sayfa yüklendiğinde hesaplamayı çalıştır
+    });
+  </script>
+</body>
+</html>
